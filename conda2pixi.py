@@ -4,8 +4,12 @@ from collections import defaultdict
 from glob import glob
 from pathlib import Path
 
+import re
 import toml
 import yaml
+
+
+PATTERN_SPEC = re.compile(r'^(?P<name>[\w-]*)(?P<version>.*)$')
 
 
 def main():
@@ -98,10 +102,14 @@ def parse_deps(deps):
 
 
 def parse_dep(dep):
-    pkg, _sep, ver = dep.partition("=")
-    pkg = pkg.strip()
-    ver = ver.strip() or "*" #TODO
-    return pkg, ver
+    match = PATTERN_SPEC.match(dep)
+
+    if not match:
+        raise SystemExit(f"invalid package version spec: {dep}")
+
+    name = match.group("name")
+    version = match.group("version") or "*"
+    return (name, version)
 
 
 class TomlEncoder(toml.TomlEncoder):
