@@ -13,9 +13,11 @@ PATTERN_SPEC = re.compile(r'^(?P<name>[\w-]*)(?P<version>.*)$')
 
 
 def main():
-    name = Path(".").absolute().name
     fns = sorted(glob("*.yml") + glob("*.yaml"))
+    if not fns:
+        raise SystemExit("no yml/yaml files found")
     chans, envs, feat = collect_and_convert(fns)
+    name = Path(".").absolute().name
     pixi = build_pixi_toml(name, chans, envs, feat)
     write_toml(pixi, "pixi.toml")
 
@@ -120,7 +122,7 @@ class TomlEncoder(toml.TomlEncoder):
 
 
 def write_toml(data, fn):
-    with open(fn, "w") as f:
+    with open(fn, "x") as f:
         toml.dump(data, f, encoder=TomlEncoder())
 
 
