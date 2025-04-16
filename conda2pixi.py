@@ -111,7 +111,24 @@ def parse_dep(dep):
 
     name = match.group("name")
     version = match.group("version") or "*"
+
+    # pixi seems to prefer "1.2.*" over "=1.2"
+    if version.startswith("=") and not version.startswith("=="):
+        version = convert_single_equals(version)
+
     return (name, version)
+
+
+def convert_single_equals(spec):
+    version = spec[1:]
+    if "=" in version:
+        # we have a more complex case like "=1.2,<=2" or an included build number
+        return spec
+    parts = version.split(".")
+    if len(parts) < 3:
+        parts.append("*")
+    version = ".".join(parts)
+    return version
 
 
 class TomlEncoder(toml.TomlEncoder):
