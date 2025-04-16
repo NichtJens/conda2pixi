@@ -1,2 +1,2 @@
 # conda2pixi
-Convert a set of conda yamls to a pixi toml
+Convert a set of conda yamls (`*.yml`, `*.yaml`) to a pixi toml.
