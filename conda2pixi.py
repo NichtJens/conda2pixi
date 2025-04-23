@@ -4,6 +4,8 @@ from collections import defaultdict
 from glob import glob
 from pathlib import Path
 
+import argparse
+import os
 import re
 import toml
 import yaml
@@ -13,13 +15,36 @@ PATTERN_SPEC = re.compile(r'^(?P<name>[\w-]*)(?P<version>.*)$')
 
 
 def main():
-    fns = sorted(glob("*.yml") + glob("*.yaml"))
-    if not fns:
-        raise SystemExit("no yml/yaml files found")
-    chans, envs, feat = collect_and_convert(fns)
+    clargs = handle_clargs()
+    input = explode_filenames(clargs.input)
+    chans, envs, feat = collect_and_convert(input)
     name = Path(".").absolute().name
     pixi = build_pixi_toml(name, chans, envs, feat)
-    write_toml(pixi, "pixi.toml")
+    write_toml(pixi, clargs.output)
+
+
+def handle_clargs():
+    parser = argparse.ArgumentParser(description="convert a set of conda YAMLs (*.yml, *.yaml) to a pixi toml")
+    parser.add_argument("input", metavar="YAML", nargs="*", default=["."], help='one or more YAML files or folders, which will match all *.yaml and *.yml inside (default: ".")')
+    parser.add_argument("-o", "--output", default="pixi.toml", help="output file name (default: pixi.toml)")
+    return parser.parse_args()
+
+
+def explode_filenames(fns):
+    res = []
+    for entry in fns:
+        path = Path(entry).expanduser()
+        if path.is_dir():
+            res += path.glob("*.yml")
+            res += path.glob("*.yaml")
+        else:
+            res += glob(os.path.expanduser(entry))
+
+    if not res:
+        raise SystemExit("no input file(s) found")
+
+    res = [str(i) for i in res]
+    return res
 
 
 def collect_and_convert(fns):
