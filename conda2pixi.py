@@ -20,13 +20,14 @@ def main():
     chans, envs, feat = collect_and_convert(input)
     name = Path(".").absolute().name
     pixi = build_pixi_toml(name, chans, envs, feat)
-    write_toml(pixi, clargs.output)
+    write_toml(pixi, clargs.output, clargs.force)
 
 
 def handle_clargs():
     parser = argparse.ArgumentParser(description="convert a set of conda YAMLs (*.yml, *.yaml) to a pixi toml")
     parser.add_argument("input", metavar="YAML", nargs="*", default=["."], help='one or more YAML files or folders, which will match all *.yaml and *.yml inside (default: ".")')
     parser.add_argument("-o", "--output", default="pixi.toml", help="output file name (default: pixi.toml)")
+    parser.add_argument("-f", "--force", action="store_true", help="do not check if the output file exists")
     return parser.parse_args()
 
 
@@ -163,8 +164,9 @@ class TomlEncoder(toml.TomlEncoder):
         return f"[{items}]"
 
 
-def write_toml(data, fn):
-    with open(fn, "x") as f:
+def write_toml(data, fn, force):
+    mode = "w" if force else "x"
+    with open(fn, mode) as f:
         toml.dump(data, f, encoder=TomlEncoder())
 
 
