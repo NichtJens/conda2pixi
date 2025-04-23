@@ -16,8 +16,8 @@ PATTERN_SPEC = re.compile(r'^(?P<name>[\w-]*)(?P<version>.*)$')
 
 def main():
     clargs = handle_clargs()
-    input = explode_filenames(clargs.input)
-    chans, envs, feat = collect_and_convert(input)
+    inputs = explode_filenames(clargs.inputs)
+    chans, envs, feat = collect_and_convert(inputs)
     name = Path(".").absolute().name
     pixi = build_pixi_toml(name, chans, envs, feat)
     write_toml(pixi, clargs.output, clargs.force)
@@ -25,7 +25,7 @@ def main():
 
 def handle_clargs():
     parser = argparse.ArgumentParser(description="convert a set of conda YAMLs (*.yml, *.yaml) to a pixi toml")
-    parser.add_argument("input", metavar="YAML", nargs="*", default=["."], help='one or more YAML files or folders, which will match all *.yaml and *.yml inside (default: ".")')
+    parser.add_argument("inputs", metavar="YAML", nargs="*", default=["."], help='one or more YAML files or folders, which will match all *.yaml and *.yml inside (default: ".")')
     parser.add_argument("-o", "--output", default="pixi.toml", help="output file name (default: pixi.toml)")
     parser.add_argument("-f", "--force", action="store_true", help="do not check if the output file exists")
     return parser.parse_args()
