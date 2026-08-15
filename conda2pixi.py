@@ -59,10 +59,12 @@ def collect_and_convert(fns):
 
         all_chans.extend(chans)
         envs[name] = [name]
-        feat[name] = {
-            "dependencies": conda,
-            "pypi-dependencies": pip
-        }
+
+        feat[name] = {}
+        if conda:
+            feat[name]["dependencies"] = conda
+        if pip:
+            feat[name]["pypi-dependencies"] = pip
 
     all_chans = sorted(set(all_chans)) or ["conda-forge"]
     return all_chans, envs, feat
