@@ -91,8 +91,8 @@ def split_conda_pip(deps):
 
 def split_conda_pip_raw(deps):
     deps_by_type = split_by_type(deps)
-    conda = deps_by_type.pop("str")
-    dicts = deps_by_type.pop("dict")
+    conda = deps_by_type.pop("str", [])
+    dicts = deps_by_type.pop("dict", [])
 
     if len(deps_by_type):
         raise SystemExit(f"found entries of wrong type(s): {deps_by_type}")
