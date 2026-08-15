@@ -66,6 +66,11 @@ def collect_and_convert(fns):
         if pip:
             feat[name]["pypi-dependencies"] = pip
 
+        for version in conda.values():
+            if isinstance(version, dict) and "channel" in version:
+                chan = version["channel"]
+                all_chans.append(chan)
+
     all_chans = sorted(set(all_chans)) or ["conda-forge"]
     return all_chans, envs, feat
 
