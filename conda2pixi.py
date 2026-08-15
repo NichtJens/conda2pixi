@@ -130,6 +130,10 @@ def parse_deps(deps):
 
 
 def parse_dep(dep):
+    channel = None
+    if "::" in dep:
+        channel, dep = dep.split("::", 1)
+
     match = PATTERN_SPEC.match(dep)
 
     if not match:
@@ -141,6 +145,9 @@ def parse_dep(dep):
     # pixi seems to prefer "1.2.*" over "=1.2"
     if version.startswith("=") and not version.startswith("=="):
         version = convert_single_equals(version)
+
+    if channel:
+        version = InlineDict({"channel": channel, "version": version})
 
     return (name, version)
 
@@ -157,7 +164,12 @@ def convert_single_equals(spec):
     return version
 
 
-class TomlEncoder(toml.TomlEncoder):
+# cf. https://stackoverflow.com/a/78758834/655404
+class InlineDict(dict, toml.decoder.InlineTableDict):
+    pass
+
+
+class TomlEncoder(toml.TomlPreserveInlineDictEncoder):
 
     def dump_list(self, v):
         items = ", ".join(str(self.dump_value(i)) for i in v)
